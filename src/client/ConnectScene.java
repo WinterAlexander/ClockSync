@@ -1,5 +1,6 @@
 package client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.event.EventTarget;
@@ -12,7 +13,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import shared.packet.PacketInJoin;
+
+import java.net.InetAddress;
 
 /**
  * <p>Undocumented :(</p>
@@ -30,6 +35,8 @@ public class ConnectScene extends Scene
 	private TextField portTextField;
 	private Button connectButton;
 	private Text connectingText;
+
+	private volatile boolean connecting;
 
 	public ConnectScene(ClockSyncClient client)
 	{
@@ -74,12 +81,46 @@ public class ConnectScene extends Scene
 
 		setRoot(grid);
 		getStylesheets().add(getClass().getResource("connect.css").toExternalForm());
+
+		connecting = false;
 	}
 
 	private void connect(ActionEvent event)
 	{
-		//connectingText.setText("Connecting...");
+		if(connecting)
+			return;
 
-		client.getStage().setScene(client.getClockScene());
+		connecting = true;
+		//connectingText.setText("Connecting...");
+		try
+		{
+			InetAddress address = InetAddress.getByName(addressTextField.getText());
+			int port = Integer.parseInt(portTextField.getText());
+
+			new Thread(() -> {
+				try
+				{
+					client.getConnection().connectTo(new PacketInJoin(), address, port, 5000);
+					Platform.runLater(() -> client.getStage().setScene(client.getClockScene()));
+				}
+				catch(Exception ex)
+				{
+					client.getLogger().info(ex.toString());
+					Platform.runLater(() -> connectingText.setText("Failed to connect"));
+				}
+				finally
+				{
+					connecting = false;
+				}
+			}).start();
+
+
+		}
+		catch(Exception ex)
+		{
+			connectingText.setText("Error !");
+			connectingText.setFill(Color.TOMATO);
+			connecting = false;
+		}
 	}
 }

@@ -1,6 +1,10 @@
 package server;
 
+import shared.packet.NiceLogFormatter;
+
 import java.net.DatagramPacket;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 /**
  * <p>Undocumented :(</p>
@@ -9,15 +13,35 @@ import java.net.DatagramPacket;
  */
 public class ClockSyncServer extends Object
 {
-
-
-	public ClockSyncServer()
+	public static void main(String[] args) throws Exception
 	{
-
+		new ClockSyncServer();
 	}
 
-	public static void main(String[] args)
-	{
+	private Logger logger;
+	private ServerConnection connection;
 
+	public ClockSyncServer() throws Exception
+	{
+		this.logger = Logger.getLogger("Server");
+		logger.setUseParentHandlers(false);
+
+		ConsoleHandler consoleHandler = new ConsoleHandler()
+		{
+			{
+				setOutputStream(System.out);
+			}
+		};
+
+		consoleHandler.setFormatter(new NiceLogFormatter());
+
+		logger.addHandler(consoleHandler);
+
+		connection = new ServerConnection(this, 4560);
+	}
+
+	public Logger getLogger()
+	{
+		return logger;
 	}
 }

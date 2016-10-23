@@ -1,0 +1,18 @@
+.root {
+    -fx-background-image: url("../background.jpg");
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+}
+
+#servertime, #clienttime {
+    -fx-font-size: 16pt;
+}
+
+.text-field {
+    -fx-max-width: 30px;
+}
+
+#millis, #clientmillis {
+    -fx-max-width: 50px;
+}
