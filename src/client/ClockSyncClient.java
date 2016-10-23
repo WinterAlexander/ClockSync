@@ -1,6 +1,7 @@
 package client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -77,7 +78,7 @@ public class ClockSyncClient extends Application
 	    primaryStage.setMinHeight(275);
 
         primaryStage.setScene(connectScene);
-
+		primaryStage.setOnCloseRequest(event -> System.exit(0));
         primaryStage.show();
     }
 

@@ -111,30 +111,6 @@ public class ClientConnection
 		notify();
 	}
 
-	public void keepAlive()
-	{
-		if(!isOpen())
-			return;
-
-		try
-		{
-			ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-			new DataOutputStream(byteStream).writeUTF("KeepAlive");
-
-			DatagramPacket data = new DatagramPacket(byteStream.toByteArray(), byteStream.size(), address, port);
-
-			udpSocket.send(data);
-		}
-		catch(SocketException ex)
-		{
-			close();
-		}
-		catch(Exception ex)
-		{
-			logger.log(Level.SEVERE, "An unexpected exception occurred while trying to keep connection alive", ex);
-		}
-	}
-
 	public void sendPacket(Packet packet)
 	{
 		try
@@ -158,7 +134,7 @@ public class ClientConnection
 
 	private void acceptInput()
 	{
-		while(isOpen()) try
+		while(!isDisposed()) try
 		{
 			DatagramPacket bufPacket = new DatagramPacket(inputBuffer, inputBuffer.length);
 
@@ -167,7 +143,9 @@ public class ClientConnection
 			ByteArrayInputStream byteStream = new ByteArrayInputStream(inputBuffer);
 			DataInputStream dataStream = new DataInputStream(byteStream);
 
-			String packetName = new DataInputStream(byteStream).readUTF();
+			String packetName = dataStream.readUTF();
+
+			logger.info("Received " + packetName);
 
 			if(packetName.equals("KeepAlive"))
 				continue;
@@ -188,7 +166,7 @@ public class ClientConnection
 				}
 			}
 
-			Packet packet = (Packet)Class.forName("me.winter.trapgame.shared.packet." + packetName).newInstance();
+			Packet packet = (Packet)Class.forName("shared.packet." + packetName).newInstance();
 			packet.readFrom(dataStream);
 
 			interpreter.receive(packet, delay, true);
@@ -206,7 +184,7 @@ public class ClientConnection
 
 	private void sendOutput()
 	{
-		while(isOpen())
+		while(!isDisposed())
 		{
 			while(toSend.size() != 0)
 			{
@@ -245,6 +223,19 @@ public class ClientConnection
 		{
 			notify();
 		}
+	}
+
+	public boolean isDisposed()
+	{
+		return udpSocket == null;
+	}
+
+	public void dispose()
+	{
+		if(isOpen())
+			close();
+
+		udpSocket = null;
 	}
 
 }

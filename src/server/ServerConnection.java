@@ -56,6 +56,8 @@ public class ServerConnection
 
 			packetName = new DataInputStream(byteStream).readUTF();
 
+			server.getLogger().info("Received " + packetName);
+
 			if(!packetName.equals("PacketInJoin"))
 				continue;
 
@@ -87,6 +89,7 @@ public class ServerConnection
 				try
 				{
 					getUdpSocket().send(data);
+					server.getLogger().info("Packet " + packet.getClass().getSimpleName() + " sent");
 				}
 				catch(Exception ex)
 				{

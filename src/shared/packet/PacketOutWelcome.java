@@ -10,6 +10,11 @@ public class PacketOutWelcome extends Packet
 {
 	private long currentTimeMillis;
 
+	public PacketOutWelcome()
+	{
+		currentTimeMillis = 0;
+	}
+
 	public PacketOutWelcome(long currentTimeMillis)
 	{
 		this.currentTimeMillis = currentTimeMillis;
